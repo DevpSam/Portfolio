@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <!-- Character Set and Viewport Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Website Title -->
+    <title>Saksham Sharma | Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Custom CSS Styles -->
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --card-bg-color: rgba(22, 27, 34, 0.8);
+            --card-border-color: rgba(56, 62, 74, 0.5);
+            --heading-color: #ffffff;
+            --accent-blue: #58a6ff;
+            --accent-purple: #bc8cff;
+            --tag-bg-color: #30363d;
+            --glow-color: rgba(88, 166, 255, 0.5);
+            --bg-pattern-color: rgba(255, 255, 255, 0.03);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f6f8fa;
+            --text-color: #24292f;
+            --card-bg-color: rgba(255, 255, 255, 0.8);
+            --card-border-color: rgba(209, 213, 219, 0.8);
+            --heading-color: #1f2328;
+            --accent-blue: #0969da;
+            --accent-purple: #8250df;
+            --tag-bg-color: #e1e4e8;
+            --glow-color: rgba(9, 105, 218, 0.5);
+            --bg-pattern-color: rgba(0, 0, 0, 0.03);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .font-heading { font-family: 'Sora', sans-serif; }
+        .glass-card {
+            background: var(--card-bg-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border-color);
+        }
+        .text-heading { color: var(--heading-color); }
+        .accent-blue { color: var(--accent-blue); }
+        .accent-purple { color: var(--accent-purple); }
+        .tag {
+            background-color: var(--tag-bg-color);
+            color: var(--heading-color);
+        }
+        .btn-primary {
+            @apply bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg;
+        }
+        .section-title {
+            @apply text-3xl sm:text-4xl font-bold font-heading mb-12 text-center text-heading;
+        }
+        .project-card::after {
+            content: 'View on GitHub →';
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+        .project-card:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .glowing-card { position: relative; }
+        .glowing-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 0.8rem;
+            background: conic-gradient(from var(--angle), transparent 0%, var(--glow-color) 20%, transparent 35%);
+            animation: spin 6s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        .glowing-card:hover::before { opacity: 1; }
+        @property --angle {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+        @keyframes spin { to { --angle: 360deg; } }
+
+        .animated-gradient-text {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple), var(--accent-blue));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 5s linear infinite;
+        }
+        @keyframes gradient-flow { to { background-position: 200% center; } }
+
+        .section-bg {
+             background-image: radial-gradient(var(--bg-pattern-color) 1px, transparent 1px);
+             background-size: 16px 16px;
+        }
+
+        .reveal {
+            position: relative;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: 0.8s all ease;
+        }
+        .reveal.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-card">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold font-heading text-heading">Saksham Sharma</a>
+            <div class="flex items-center gap-4 md:gap-8">
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <a href="#about" class="hover:text-blue-400 transition-colors">About</a>
+                    <a href="#projects" class="hover:text-blue-400 transition-colors">Projects</a>
+                    <a href="#skills" class="hover:text-blue-400 transition-colors">Toolbox</a>
+                    <a href="#contact" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-all duration-300">Contact</a>
+                </nav>
+                <button id="theme-toggle" class="text-heading hover:text-blue-400 transition-colors">
+                    <i id="theme-toggle-dark-icon" data-lucide="moon" class="w-6 h-6"></i>
+                    <i id="theme-toggle-light-icon" data-lucide="sun" class="w-6 h-6 hidden"></i>
+                </button>
+                <button id="mobile-menu-button" class="md:hidden text-heading">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#about" class="block py-2">About</a>
+            <a href="#projects" class="block py-2">Projects</a>
+            <a href="#skills" class="block py-2">Toolbox</a>
+            <a href="#contact" class="block mt-2 bg-blue-600 text-white py-2 rounded-lg text-center">Contact</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
+            <canvas id="hero-canvas"></canvas>
+            <div class="relative z-10 p-6">
+                <h1 class="text-5xl sm:text-7xl lg:text-8xl font-black font-heading text-heading mb-4 animated-gradient-text">Data-Driven Developer</h1>
+                <p class="text-xl md:text-2xl font-semibold text-heading mb-6 font-heading">Turning complex data into intelligent applications.</p>
+                <p class="max-w-2xl mx-auto text-lg md:text-xl">
+                    Computer Science student specializing in Data Science and Machine Learning.
+                </p>
+                <a href="#projects" class="mt-8 inline-block btn-primary">Explore Projects</a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 md:py-32 section-bg">
+            <div class="container mx-auto px-6">
+                <div class="reveal max-w-5xl mx-auto glass-card rounded-xl p-6 md:p-12 shadow-2xl">
+                    <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                        <img src="https://avatars.githubusercontent.com/u/121735165?v=4" alt="Saksham Sharma" class="w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-blue-500 object-cover flex-shrink-0">
+                        <div class="text-center md:text-left">
+                            <h2 class="text-3xl font-bold font-heading text-heading mb-4">Crafting Intelligent Solutions</h2>
+                            <p class="mb-4">
+                                 I'm a passionate Computer Science student from UPES Dehradun with a strong foundation in programming and a keen interest in data-driven problem-solving. My strength lies in bridging the gap between raw data and actionable insights, using technology to build tools that are both intelligent and user-friendly.
+                            </p>
+                            <p class="mb-4">
+                                From analyzing sales patterns to implementing real-time computer vision, I enjoy the challenge of making data accessible and actionable through elegant code.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-20 md:py-24 section-bg">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title reveal">Featured Projects</h2>
+                <div id="projects-container" class="reveal flex flex-wrap justify-center gap-8">
+
+                    <!-- Project 1: Email Forensic Intelligence Visualiser -->
+                    <a href="https://github.com/DevpSam/Email-Forensic-Intelligence-Visualiser" target="_blank" class="project-card glowing-card glass-card rounded-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 shadow-lg flex flex-col relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                        <div class="h-48 bg-gradient-to-br from-indigo-900 to-black flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-16 h-16 text-indigo-400"></i>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold font-heading text-xl text-heading mb-2">Email Forensic Intelligence Visualiser</h3>
+                            <p class="text-sm mb-4 flex-grow">A tool for analyzing email headers and metadata to extract forensic intelligence and visualize security communication patterns.</p>
+                            <div class="flex flex-wrap gap-2 text-xs mt-auto">
+                                <span class="tag px-2 py-1 rounded">Python</span>
+                                <span class="tag px-2 py-1 rounded">Forensics</span>
+                                <span class="tag px-2 py-1 rounded">Security</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 2: Stock Market Analysis -->
+                    <a href="https://github.com/DevpSam/Stock_market_analysis" target="_blank" class="project-card glowing-card glass-card rounded-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 shadow-lg flex flex-col relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                        <div class="h-48 bg-gradient-to-br from-blue-900 to-black flex items-center justify-center">
+                            <i data-lucide="trending-up" class="w-16 h-16 text-blue-400"></i>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold font-heading text-xl text-heading mb-2">Stock Market Analysis</h3>
+                            <p class="text-sm mb-4 flex-grow">Data analytics project utilizing yfinance to study historical stock prices, market trends, and risk assessment.</p>
+                            <div class="flex flex-wrap gap-2 text-xs mt-auto">
+                                <span class="tag px-2 py-1 rounded">Python</span>
+                                <span class="tag px-2 py-1 rounded">yfinance</span>
+                                <span class="tag px-2 py-1 rounded">Pandas</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 3: Sales Analysis -->
+                    <a href="https://github.com/DevpSam/SALES_ANALYSIS" target="_blank" class="project-card glowing-card glass-card rounded-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 shadow-lg flex flex-col relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                        <div class="h-48 bg-gradient-to-br from-purple-900 to-black flex items-center justify-center">
+                            <i data-lucide="bar-chart-3" class="w-16 h-16 text-purple-400"></i>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold font-heading text-xl text-heading mb-2">Sales Analysis</h3>
+                            <p class="text-sm mb-4 flex-grow">Uncovering revenue drivers and optimization strategies through exploratory data analysis (EDA) and visualization.</p>
+                            <div class="flex flex-wrap gap-2 text-xs mt-auto">
+                                <span class="tag px-2 py-1 rounded">Python</span>
+                                <span class="tag px-2 py-1 rounded">Seaborn</span>
+                                <span class="tag px-2 py-1 rounded">EDA</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 4: Churn Prediction -->
+                    <a href="https://github.com/DevpSam/Churn-prediction-Model" target="_blank" class="project-card glowing-card glass-card rounded-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 shadow-lg flex flex-col relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                        <div class="h-48 bg-gradient-to-br from-red-900 to-black flex items-center justify-center">
+                            <i data-lucide="user-minus" class="w-16 h-16 text-red-400"></i>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold font-heading text-xl text-heading mb-2">Churn Prediction Model</h3>
+                            <p class="text-sm mb-4 flex-grow">Machine Learning model designed to predict customer attrition to support retention strategies.</p>
+                            <div class="flex flex-wrap gap-2 text-xs mt-auto">
+                                <span class="tag px-2 py-1 rounded">Python</span>
+                                <span class="tag px-2 py-1 rounded">Scikit-Learn</span>
+                                <span class="tag px-2 py-1 rounded">ML</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 5: Smile Detection Pro -->
+                    <a href="https://github.com/DevpSam/Smile-Detection-Pro" target="_blank" class="project-card glowing-card glass-card rounded-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 shadow-lg flex flex-col relative w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                        <div class="h-48 bg-gradient-to-br from-yellow-900 to-black flex items-center justify-center">
+                            <i data-lucide="smile" class="w-16 h-16 text-yellow-400"></i>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold font-heading text-xl text-heading mb-2">Smile Detection Pro</h3>
+                            <p class="text-sm mb-4 flex-grow">Real-time application utilizing face-api.js for facial recognition and instant smile detection via webcam.</p>
+                            <div class="flex flex-wrap gap-2 text-xs mt-auto">
+                                <span class="tag px-2 py-1 rounded">JavaScript</span>
+                                <span class="tag px-2 py-1 rounded">Face-API.js</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Toolbox Section -->
+        <section id="skills" class="py-20 md:py-24 section-bg">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title reveal">Technical Toolbox</h2>
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 reveal">
+                    <!-- Languages -->
+                    <div class="glowing-card glass-card p-6 rounded-lg">
+                        <i data-lucide="code-2" class="w-10 h-10 accent-blue mb-4"></i>
+                        <h3 class="font-bold font-heading text-xl text-heading mb-3">Languages & Frameworks</h3>
+                        <ul class="space-y-2 text-sm list-disc list-inside">
+                            <li><span class="font-semibold">Core:</span> Python, C, SQL</li>
+                            <li><span class="font-semibold">Web:</span> HTML5, CSS3, JavaScript</li>
+                            <li><span class="font-semibold">Dev:</span> Flask, Streamlit</li>
+                        </ul>
+                    </div>
+                    <!-- Data & ML -->
+                    <div class="glowing-card glass-card p-6 rounded-lg">
+                        <i data-lucide="cpu" class="w-10 h-10 accent-purple mb-4"></i>
+                        <h3 class="font-bold font-heading text-xl text-heading mb-3">Data Science & ML</h3>
+                        <ul class="space-y-2 text-sm list-disc list-inside">
+                            <li><span class="font-semibold">Analysis:</span> Pandas, NumPy, MS Excel</li>
+                            <li><span class="font-semibold">ML:</span> Scikit-learn, Regression, Clustering</li>
+                            <li><span class="font-semibold">Viz:</span> Matplotlib, Seaborn</li>
+                        </ul>
+                    </div>
+                    <!-- Tools -->
+                    <div class="glowing-card glass-card p-6 rounded-lg">
+                        <i data-lucide="terminal" class="w-10 h-10 accent-blue mb-4"></i>
+                        <h3 class="font-bold font-heading text-xl text-heading mb-3">Developer Tools</h3>
+                        <ul class="space-y-2 text-sm list-disc list-inside">
+                            <li><span class="font-semibold">Workflow:</span> Git, GitHub, VS Code</li>
+                            <li><span class="font-semibold">Environments:</span> Jupyter, Anaconda</li>
+                        </ul>
+                    </div>
+                     <!-- Soft Skills -->
+                    <div class="glowing-card glass-card p-6 rounded-lg">
+                        <i data-lucide="award" class="w-10 h-10 accent-purple mb-4"></i>
+                        <h3 class="font-bold font-heading text-xl text-heading mb-3">Soft Skills</h3>
+                        <ul class="space-y-2 text-sm list-disc list-inside">
+                             <li>Analytical Problem Solving</li>
+                             <li>Team Collaboration</li>
+                             <li>Technical Communication</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 md:py-32 section-bg">
+            <div class="container mx-auto px-6 text-center">
+                <div class="max-w-2xl mx-auto reveal">
+                    <h2 class="section-title">Get In Touch</h2>
+                    <p class="text-lg mb-8">Currently open to internships and collaborative data projects.</p>
+                    <a href="mailto:sakshams1aug@gmail.com" class="text-2xl font-semibold accent-blue hover:underline font-heading break-all">
+                        sakshams1aug@gmail.com
+                    </a>
+                    <div class="flex justify-center gap-6 mt-12">
+                        <a href="https://www.linkedin.com/in/saksham-sharma-b9a201305/" target="_blank" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i data-lucide="linkedin" class="w-8 h-8"></i>
+                        </a>
+                        <a href="https://github.com/DevpSam" target="_blank" class="text-gray-400 hover:text-blue-400 transition-colors">
+                            <i data-lucide="github" class="w-8 h-8"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-[var(--card-border-color)] py-6 text-center text-sm opacity-70">
+        <p>&copy; 2025 Saksham Sharma. Built with Tailwind & Lucide.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function setTheme(isLight) {
+            document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+            lightIcon.classList.toggle('hidden', !isLight);
+            darkIcon.classList.toggle('hidden', isLight);
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        setTheme(savedTheme === 'light');
+        themeToggle.addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark'));
+
+        // Mobile Menu
+        const menuBtn = document.getElementById('mobile-menu-button');
+        const menu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => menu.classList.toggle('hidden'));
+
+        // Intersection Observer for Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Background Animation Logic
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.size = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(88, 166, 255, 0.7)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = Array.from({ length: 80 }, () => new Particle());
+        }
+
+        // Network connection logic
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                                 + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+
+                    // Connection distance threshold
+                    if (distance < (canvas.width / 8) * (canvas.height / 8)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = `rgba(88, 166, 255, ${opacityValue * 0.5})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            connect();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+    </script>
+</body>
+</html>
