@@ -284,6 +284,14 @@ footer span{color:#fff}
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
+/* Expanded Invisible Hitbox */
+.bot-body::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+}
+
 .bot-body:hover {
   box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
   border-color: var(--tx-70);
@@ -308,7 +316,7 @@ footer span{color:#fff}
 .saksham-bot.sleeping .bot-body { border-color: var(--line-hi); }
 .saksham-bot.sleeping .bot-ear { border-color: var(--line-hi); }
 
-/* Face & Eyes (Square to match reference image) */
+/* Face & Eyes */
 .bot-face {
   position: absolute;
   inset: 0;
@@ -318,12 +326,17 @@ footer span{color:#fff}
   gap: 8px;
   transition: transform 0.1s; 
 }
+
 .bot-eye {
   width: 10px;
   height: 10px;
   background: #fff;
-  transition: height 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  transition: all 0.15s ease;
 }
+
+/* =========================================================
+   NEO'S EMOTES (Sleeping, Blinking, Happy, Alert, Thinking)
+   ========================================================= */
 
 /* Sleeping State */
 .saksham-bot.sleeping .bot-eye {
@@ -347,7 +360,40 @@ footer span{color:#fff}
   animation: zzzFloat 2.5s infinite;
 }
 
-/* Dialogue Bubble & Chat Interface */
+/* Blinking Emote */
+.saksham-bot.blink .bot-eye {
+  height: 2px;
+  transform: translateY(4px);
+}
+
+/* Happy Emote (On Hover) */
+.saksham-bot.happy .bot-eye {
+  height: 4px;
+  width: 12px;
+  border-radius: 4px 4px 0 0;
+  transform: translateY(3px);
+}
+
+/* Alert / Chat-Active Emote */
+.saksham-bot.chat-active .bot-eye {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 8px #fff;
+}
+
+/* Thinking Emote (Processing Query) */
+.saksham-bot.thinking .bot-eye {
+  background: var(--tx-50);
+  animation: thinkPulse 0.2s alternate infinite;
+}
+@keyframes thinkPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(0.6); }
+}
+
+/* =========================================================
+   CHAT INTERFACE
+   ========================================================= */
 .bot-bubble {
   position: absolute;
   top: 56px;
@@ -376,7 +422,6 @@ footer span{color:#fff}
   transform: translateX(-50%) translateY(0) scale(1);
 }
 
-/* Expanded Chat Box */
 .saksham-bot.chat-active .bot-bubble {
   opacity: 1;
   transform: translateX(-50%) translateY(0) scale(1);
@@ -763,7 +808,7 @@ footer span{color:#fff}
     <div class="bot-ear left"></div>
     <div class="bot-ear right"></div>
     <div class="bot-face" id="bot-face">
-      <!-- Square Eyes (Ref: image_70051e.png) -->
+      <!-- Square Eyes -->
       <div class="bot-eye"></div>
       <div class="bot-eye"></div>
     </div>
@@ -870,8 +915,32 @@ const chatLog = document.getElementById('neo-chat-log');
 let sleepTimer;
 const SLEEP_DELAY = 5000;
 let isChatOpen = false;
+let isHovered = false; 
 
-// Neo's Roaming Physics
+// Neo Blinking Emote Reflex
+function neoBlink() {
+  const delay = Math.random() * 4000 + 2000; 
+  setTimeout(() => {
+    if (!bot.classList.contains('sleeping') && !isHovered && !isChatOpen) {
+      bot.classList.add('blink');
+      setTimeout(() => bot.classList.remove('blink'), 150); 
+    }
+    neoBlink();
+  }, delay);
+}
+neoBlink(); // Start blink cycle
+
+// Pause & Happy Emote on Hover logic
+botBody.addEventListener('mouseenter', () => { 
+  isHovered = true; 
+  if(!bot.classList.contains('sleeping')) bot.classList.add('happy');
+});
+botBody.addEventListener('mouseleave', () => { 
+  isHovered = false; 
+  bot.classList.remove('happy');
+});
+
+// Neo's Roaming Physics 
 let neoX = window.innerWidth - 100;
 let neoY = window.innerHeight - 100;
 let neoVx = -1.2;
@@ -879,8 +948,7 @@ let neoVy = -0.8;
 
 function roam() {
   if (!isChatOpen) {
-    // If sleeping, drift very slowly. If awake, move normally.
-    let speedMult = bot.classList.contains('sleeping') ? 0.3 : 1;
+    let speedMult = isHovered ? 0 : (bot.classList.contains('sleeping') ? 0.3 : 1);
     
     neoX += neoVx * speedMult;
     neoY += neoVy * speedMult;
@@ -888,7 +956,7 @@ function roam() {
     // Bounce off edges with padding
     if (neoX <= 20) { neoX = 20; neoVx *= -1; }
     if (neoX >= window.innerWidth - 80) { neoX = window.innerWidth - 80; neoVx *= -1; }
-    if (neoY <= 80) { neoY = 80; neoVy *= -1; } // Keep away from top nav
+    if (neoY <= 80) { neoY = 80; neoVy *= -1; } 
     if (neoY >= window.innerHeight - 80) { neoY = window.innerHeight - 80; neoVy *= -1; }
 
     // Organic random directional drift
@@ -939,18 +1007,22 @@ function addChatLog(sender, message) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// Chat Interaction
+// Chat Interaction with Thinking Emote
 chatInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter' && chatInput.value.trim() !== '') {
     const userText = chatInput.value.trim();
     addChatLog('User', userText);
     chatInput.value = '';
     
-    // Simulate thinking delay
+    // Toggle Thinking Emote
+    bot.classList.add('thinking');
+    
+    // Simulate processing delay
     setTimeout(() => {
+      bot.classList.remove('thinking');
       const response = checkKnowledge(userText);
       addChatLog('Neo', response);
-    }, 400);
+    }, 600);
   }
 });
 
@@ -993,6 +1065,7 @@ function resetSleepTimer() {
   sleepTimer = setTimeout(() => {
     if(!isChatOpen) {
       bot.classList.add('sleeping');
+      bot.classList.remove('happy'); // Remove happy state when falling asleep
     }
   }, SLEEP_DELAY);
 }
