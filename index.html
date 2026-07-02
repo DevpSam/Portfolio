@@ -257,18 +257,20 @@ footer span{color:#fff}
 ::-webkit-scrollbar-thumb:hover{background:#fff}
 
 /* =========================================================
-   SAKSHAM AI BOT
+   NEO THE CYBER CAT (AI BOT)
    ========================================================= */
 .saksham-bot {
   position: fixed;
-  bottom: 32px;
-  right: 32px;
+  top: 0;
+  left: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: center;
   pointer-events: none; 
+  will-change: transform;
 }
+
 .bot-body {
   width: 48px;
   height: 48px;
@@ -276,16 +278,37 @@ footer span{color:#fff}
   border: 1px solid #fff;
   position: relative;
   clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-  animation: botFloat 3s ease-in-out infinite;
   pointer-events: auto;
   cursor: pointer;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
+
 .bot-body:hover {
   box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
   border-color: var(--tx-70);
 }
+
+/* Cat Ears - Minimal Cyber Geometric Style */
+.bot-ear {
+  position: absolute;
+  top: -8px;
+  width: 14px;
+  height: 14px;
+  background: var(--bg-1);
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  z-index: -1;
+  transition: border-color 0.3s ease;
+}
+.bot-ear.left { left: 4px; transform: rotate(45deg) skew(10deg, 10deg); }
+.bot-ear.right { right: 4px; transform: rotate(45deg) skew(10deg, 10deg); }
+
+.bot-body:hover .bot-ear { border-color: var(--tx-70); }
+.saksham-bot.sleeping .bot-body { border-color: var(--line-hi); }
+.saksham-bot.sleeping .bot-ear { border-color: var(--line-hi); }
+
+/* Face & Eyes (Square to match reference image) */
 .bot-face {
   position: absolute;
   inset: 0;
@@ -296,20 +319,17 @@ footer span{color:#fff}
   transition: transform 0.1s; 
 }
 .bot-eye {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   background: #fff;
   transition: height 0.3s ease, transform 0.3s ease, background 0.3s ease;
 }
+
 /* Sleeping State */
 .saksham-bot.sleeping .bot-eye {
   height: 2px;
   background: var(--tx-50);
   transform: translateY(4px);
-}
-.saksham-bot.sleeping .bot-body {
-  animation: botSleep 4s ease-in-out infinite;
-  border-color: var(--line-hi);
 }
 .bot-zzz {
   position: absolute;
@@ -326,11 +346,13 @@ footer span{color:#fff}
 .saksham-bot.sleeping .bot-zzz {
   animation: zzzFloat 2.5s infinite;
 }
-/* Dialogue Bubble */
+
+/* Dialogue Bubble & Chat Interface */
 .bot-bubble {
   position: absolute;
-  bottom: 64px;
-  right: 0;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px) scale(0.95);
   background: #fff;
   color: #000;
   padding: 8px 14px;
@@ -342,24 +364,80 @@ footer span{color:#fff}
   white-space: nowrap;
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
   opacity: 0;
-  transform: translateY(10px) scale(0.95);
   transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
   pointer-events: none;
-  transform-origin: bottom right;
-}
-.bot-bubble.show {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+  transform-origin: top center;
+  min-width: 120px;
+  text-align: center;
 }
 
-@keyframes botFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.bot-bubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
 }
-@keyframes botSleep {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(4px) scale(0.98); }
+
+/* Expanded Chat Box */
+.saksham-bot.chat-active .bot-bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+  width: 260px;
+  background: var(--bg-1);
+  border: 1px solid #fff;
+  color: #fff;
+  pointer-events: auto;
+  white-space: normal;
+  text-align: left;
+  text-transform: none;
+  padding: 12px;
+  font-weight: 400;
 }
+
+#bubble-text {
+  transition: opacity 0.2s;
+}
+.saksham-bot.chat-active #bubble-text {
+  display: none;
+}
+
+#neo-chat-ui {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+.saksham-bot.chat-active #neo-chat-ui {
+  display: flex;
+}
+
+#neo-chat-log {
+  max-height: 100px;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--tx-70);
+  margin-bottom: 4px;
+}
+#neo-chat-log p { margin-bottom: 6px; }
+#neo-chat-log span.user { color: #fff; font-weight: bold; }
+#neo-chat-log span.neo { color: #0f0; font-weight: bold; }
+
+#neo-chat-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--tx-50);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 0;
+  outline: none;
+}
+#neo-chat-input::placeholder { color: var(--tx-50); }
+
+/* Custom Scrollbar for Chat */
+#neo-chat-log::-webkit-scrollbar { width: 4px; }
+#neo-chat-log::-webkit-scrollbar-track { background: transparent; }
+#neo-chat-log::-webkit-scrollbar-thumb { background: var(--tx-50); }
+
 @keyframes zzzFloat {
   0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
   50% { opacity: 1; }
@@ -670,14 +748,24 @@ footer span{color:#fff}
 
 </main>
 
-<!-- SAKSHAM AI BOT -->
+<!-- NEO THE CYBER CAT -->
 <div id="saksham-bot" class="saksham-bot">
-  <div class="bot-bubble" id="bot-bubble">System Online.</div>
+  <div class="bot-bubble" id="bot-bubble">
+    <div id="bubble-text">System Online. Meow.</div>
+    <div id="neo-chat-ui">
+      <div id="neo-chat-log"></div>
+      <input type="text" id="neo-chat-input" placeholder="Ask Neo..." autocomplete="off"/>
+    </div>
+  </div>
   <div class="bot-zzz">Zzz...</div>
-  <div class="bot-body">
+  <div class="bot-body" id="bot-body">
+    <!-- Cyber Cat Ears -->
+    <div class="bot-ear left"></div>
+    <div class="bot-ear right"></div>
     <div class="bot-face" id="bot-face">
-      <div class="bot-eye left"></div>
-      <div class="bot-eye right"></div>
+      <!-- Square Eyes (Ref: image_70051e.png) -->
+      <div class="bot-eye"></div>
+      <div class="bot-eye"></div>
     </div>
   </div>
 </div>
@@ -769,57 +857,159 @@ resize();
 requestAnimationFrame(draw);
 
 /* =========================================================
-   SAKSHAM AI LOGIC
+   NEO THE CYBER CAT (LOGIC & ROAMING)
    ========================================================= */
 const bot = document.getElementById('saksham-bot');
+const botBody = document.getElementById('bot-body');
 const botFace = document.getElementById('bot-face');
 const botBubble = document.getElementById('bot-bubble');
+const bubbleText = document.getElementById('bubble-text');
+const chatInput = document.getElementById('neo-chat-input');
+const chatLog = document.getElementById('neo-chat-log');
+
 let sleepTimer;
-const SLEEP_DELAY = 5000; // 5 seconds of inactivity
+const SLEEP_DELAY = 5000;
+let isChatOpen = false;
 
-const sectionMessages = {
-  'top': 'System Online. Welcome.',
-  'about': 'Scanning bio... Hybrid engineer found.',
-  'skills': 'Analyzing tech stack...',
-  'experience': 'Reviewing timeline logs...',
-  'projects': 'Accessing project archives...',
-  'credentials': 'Verifying credentials...',
-  'contact': 'Ready to establish connection.'
-};
+// Neo's Roaming Physics
+let neoX = window.innerWidth - 100;
+let neoY = window.innerHeight - 100;
+let neoVx = -1.2;
+let neoVy = -0.8;
 
-let currentSection = 'top';
+function roam() {
+  if (!isChatOpen) {
+    // If sleeping, drift very slowly. If awake, move normally.
+    let speedMult = bot.classList.contains('sleeping') ? 0.3 : 1;
+    
+    neoX += neoVx * speedMult;
+    neoY += neoVy * speedMult;
 
-// Show dialogue bubble
-function showMessage(text, duration = 3000) {
-  botBubble.textContent = text;
-  botBubble.classList.add('show');
+    // Bounce off edges with padding
+    if (neoX <= 20) { neoX = 20; neoVx *= -1; }
+    if (neoX >= window.innerWidth - 80) { neoX = window.innerWidth - 80; neoVx *= -1; }
+    if (neoY <= 80) { neoY = 80; neoVy *= -1; } // Keep away from top nav
+    if (neoY >= window.innerHeight - 80) { neoY = window.innerHeight - 80; neoVy *= -1; }
+
+    // Organic random directional drift
+    if (Math.random() < 0.02 && speedMult === 1) {
+      neoVx += (Math.random() - 0.5) * 1.5;
+      neoVy += (Math.random() - 0.5) * 1.5;
+      neoVx = Math.max(-2.5, Math.min(2.5, neoVx));
+      neoVy = Math.max(-2.5, Math.min(2.5, neoVy));
+    }
+  }
   
-  // Clear any existing timeout on the bubble to prevent early hiding
-  if (botBubble.hideTimeout) clearTimeout(botBubble.hideTimeout);
-  
-  botBubble.hideTimeout = setTimeout(() => {
-    botBubble.classList.remove('show');
-  }, duration);
+  bot.style.transform = `translate(${neoX}px, ${neoY}px)`;
+  requestAnimationFrame(roam);
 }
 
-// Wake bot up
+// Start roaming
+requestAnimationFrame(roam);
+
+// Neo's Knowledge Base
+const neoKnowledge = [
+  { keys: ['live', 'location', 'where', 'city', 'address', 'from'], ans: "He originally hails from Agra, but is currently based in Dehradun for his studies." },
+  { keys: ['study', 'studying', 'college', 'university', 'degree'], ans: "He is a 2nd-year B.Tech Computer Science student specializing in Data Science at UPES." },
+  { keys: ['help', 'hire', 'do', 'offer', 'work'], ans: "He can engineer ML pipelines, construct real-time media systems, and handle predictive analytics. Looking for a hybrid engineer? He's your guy." },
+  { keys: ['contact', 'email', 'phone', 'reach', 'call'], ans: "You can signal him at sakshams1aug@gmail.com or call +91 95483 50411." },
+  { keys: ['qualifications', 'education', 'cgpa', 'marks', 'score'], ans: "He holds a strong 7.22 CGPA at UPES and scored 92% in his Class X ICSE boards at St. Peter's College, Agra." },
+  { keys: ['skills', 'tech', 'stack', 'languages', 'know', 'iq', 'eq'], ans: "He's highly capable with both EQ and IQ. Technically, he ships with Python, SQL, React, PHP, Face-API.js, and ML libraries like Scikit-learn." },
+  { keys: ['music', 'hobby', 'hobbies', 'dex', 'venom', 'fl studio'], ans: "Outside of code, he's an avid music producer and sound engineer operating under the aliases Dex and Venom using FL Studio!" },
+  { keys: ['diet', 'food', 'eat'], ans: "He strictly consumes a vegetarian diet. Paneer dishes and veg pizzas are common in his logs." },
+  { keys: ['brother', 'family', 'shubh'], ans: "His brother Shubh works as a Data Analyst, a true data-driven family." },
+  { keys: ['toshani', 'partner', 'girlfriend', 'dating'], ans: "He is in a relationship with Toshani, and has even developed personalized web applications for her." },
+  { keys: ['projects', 'built', 'made', 'portfolio'], ans: "He's architected tools like Smile Detector Pro, Attendance Duel, and a robust Customer Churn Prediction model." }
+];
+
+function checkKnowledge(query) {
+  const q = query.toLowerCase();
+  for (const item of neoKnowledge) {
+    if (item.keys.some(k => q.includes(k))) {
+      return item.ans;
+    }
+  }
+  return "Meow. I don't have that in my current databanks. Try asking about his location, skills, education, or contact info.";
+}
+
+function addChatLog(sender, message) {
+  const p = document.createElement('p');
+  p.innerHTML = `<span class="${sender.toLowerCase()}">${sender}:</span> ${message}`;
+  chatLog.appendChild(p);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// Chat Interaction
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+    const userText = chatInput.value.trim();
+    addChatLog('User', userText);
+    chatInput.value = '';
+    
+    // Simulate thinking delay
+    setTimeout(() => {
+      const response = checkKnowledge(userText);
+      addChatLog('Neo', response);
+    }, 400);
+  }
+});
+
+// Click bot to toggle chat
+botBody.addEventListener('click', (e) => {
+  e.stopPropagation();
+  isChatOpen = !isChatOpen;
+  
+  if (isChatOpen) {
+    bot.classList.add('chat-active');
+    wakeUp();
+    if(chatLog.innerHTML === '') {
+      addChatLog('Neo', "Meow. I am Neo, Saksham's cyber-feline assistant. What do you want to know about him?");
+    }
+    setTimeout(() => chatInput.focus(), 100);
+  } else {
+    bot.classList.remove('chat-active');
+  }
+});
+
+// Close chat when clicking outside
+document.addEventListener('click', (e) => {
+  if (isChatOpen && !bot.contains(e.target)) {
+    isChatOpen = false;
+    bot.classList.remove('chat-active');
+  }
+});
+
+// Wake / Sleep Logic
 function wakeUp() {
   if (bot.classList.contains('sleeping')) {
     bot.classList.remove('sleeping');
-    showMessage("Resuming scanning...");
+    if(!isChatOpen) showBubble("Scanning sector...");
   }
   resetSleepTimer();
 }
 
-// Reset the inactivity timer
 function resetSleepTimer() {
   clearTimeout(sleepTimer);
   sleepTimer = setTimeout(() => {
-    bot.classList.add('sleeping');
+    if(!isChatOpen) {
+      bot.classList.add('sleeping');
+    }
   }, SLEEP_DELAY);
 }
 
-// Track mouse to move eyes/face
+// Ambient popup bubble
+function showBubble(text, duration = 2500) {
+  if(isChatOpen) return;
+  bubbleText.textContent = text;
+  botBubble.classList.add('show');
+  
+  if (botBubble.hideTimeout) clearTimeout(botBubble.hideTimeout);
+  botBubble.hideTimeout = setTimeout(() => {
+    if(!bot.classList.contains('chat-active')) botBubble.classList.remove('show');
+  }, duration);
+}
+
+// Track mouse to move face
 window.addEventListener('mousemove', (e) => {
   wakeUp();
   if(!bot.classList.contains('sleeping')) {
@@ -827,53 +1017,22 @@ window.addEventListener('mousemove', (e) => {
     const botCenterX = botRect.left + botRect.width / 2;
     const botCenterY = botRect.top + botRect.height / 2;
     
-    // Calculate normalized delta for the eyes
     const deltaX = (e.clientX - botCenterX) / window.innerWidth;
     const deltaY = (e.clientY - botCenterY) / window.innerHeight;
     
-    // Move the face around slightly
     botFace.style.transform = `translate(${deltaX * 12}px, ${deltaY * 12}px)`;
   } else {
     botFace.style.transform = `translate(0px, 0px)`;
   }
 });
 
-// Section tracking on scroll
-window.addEventListener('scroll', () => {
-  wakeUp();
-  let foundSection = currentSection;
-  const sections = ['top', 'about', 'skills', 'experience', 'projects', 'credentials', 'contact'];
-  
-  for (const sec of sections) {
-    const el = document.getElementById(sec);
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      if (rect.top <= window.innerHeight * 0.4 && rect.bottom >= 0) {
-        foundSection = sec;
-      }
-    }
-  }
-  
-  if (foundSection !== currentSection) {
-    currentSection = foundSection;
-    if (sectionMessages[currentSection]) {
-      showMessage(sectionMessages[currentSection]);
-    }
-  }
-});
-
-// Listeners to wake up bot on any action
-window.addEventListener('click', wakeUp);
+// Listeners to wake up bot on scroll or keypress
+window.addEventListener('scroll', wakeUp);
 window.addEventListener('keypress', wakeUp);
-
-bot.addEventListener('click', () => {
-  wakeUp();
-  showMessage("Need assistance? I'm Saksham AI.");
-});
 
 // Initialize
 resetSleepTimer();
-setTimeout(() => showMessage("Saksham AI Online. Navigating...", 3500), 1000);
+setTimeout(() => showBubble("Neo Online. Meow.", 3500), 1000);
 
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
