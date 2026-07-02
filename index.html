@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -256,6 +255,116 @@ footer span{color:#fff}
 ::-webkit-scrollbar-track{background:var(--bg-0)}
 ::-webkit-scrollbar-thumb{background:var(--line-br)}
 ::-webkit-scrollbar-thumb:hover{background:#fff}
+
+/* =========================================================
+   SAKSHAM AI BOT
+   ========================================================= */
+.saksham-bot {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none; 
+}
+.bot-body {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-1);
+  border: 1px solid #fff;
+  position: relative;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  animation: botFloat 3s ease-in-out infinite;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.bot-body:hover {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+  border-color: var(--tx-70);
+}
+.bot-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s; 
+}
+.bot-eye {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  transition: height 0.3s ease, transform 0.3s ease, background 0.3s ease;
+}
+/* Sleeping State */
+.saksham-bot.sleeping .bot-eye {
+  height: 2px;
+  background: var(--tx-50);
+  transform: translateY(4px);
+}
+.saksham-bot.sleeping .bot-body {
+  animation: botSleep 4s ease-in-out infinite;
+  border-color: var(--line-hi);
+}
+.bot-zzz {
+  position: absolute;
+  top: -24px;
+  right: -12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--tx-50);
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.saksham-bot.sleeping .bot-zzz {
+  animation: zzzFloat 2.5s infinite;
+}
+/* Dialogue Bubble */
+.bot-bubble {
+  position: absolute;
+  bottom: 64px;
+  right: 0;
+  background: #fff;
+  color: #000;
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  pointer-events: none;
+  transform-origin: bottom right;
+}
+.bot-bubble.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@keyframes botFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes botSleep {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(4px) scale(0.98); }
+}
+@keyframes zzzFloat {
+  0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translate(12px, -20px) scale(1.2); opacity: 0; }
+}
 </style>
 </head>
 <body>
@@ -561,6 +670,18 @@ footer span{color:#fff}
 
 </main>
 
+<!-- SAKSHAM AI BOT -->
+<div id="saksham-bot" class="saksham-bot">
+  <div class="bot-bubble" id="bot-bubble">System Online.</div>
+  <div class="bot-zzz">Zzz...</div>
+  <div class="bot-body">
+    <div class="bot-face" id="bot-face">
+      <div class="bot-eye left"></div>
+      <div class="bot-eye right"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 // Reveal on scroll
 const io = new IntersectionObserver((entries)=>{
@@ -624,7 +745,6 @@ function draw(){
       const d=Math.hypot(dx,dy);
       if(d < maxDist){
         const t = 1 - d/maxDist;
-        // Mouse boost
         const midX = (a.x+b.x)/2, midY=(a.y+b.y)/2;
         const dToM = Math.hypot(mx-midX, my-midY);
         const boost = dToM < 200 ? (1 - dToM/200)*0.4 : 0;
@@ -645,9 +765,116 @@ function draw(){
 
   requestAnimationFrame(draw);
 }
-
 resize();
 requestAnimationFrame(draw);
+
+/* =========================================================
+   SAKSHAM AI LOGIC
+   ========================================================= */
+const bot = document.getElementById('saksham-bot');
+const botFace = document.getElementById('bot-face');
+const botBubble = document.getElementById('bot-bubble');
+let sleepTimer;
+const SLEEP_DELAY = 5000; // 5 seconds of inactivity
+
+const sectionMessages = {
+  'top': 'System Online. Welcome.',
+  'about': 'Scanning bio... Hybrid engineer found.',
+  'skills': 'Analyzing tech stack...',
+  'experience': 'Reviewing timeline logs...',
+  'projects': 'Accessing project archives...',
+  'credentials': 'Verifying credentials...',
+  'contact': 'Ready to establish connection.'
+};
+
+let currentSection = 'top';
+
+// Show dialogue bubble
+function showMessage(text, duration = 3000) {
+  botBubble.textContent = text;
+  botBubble.classList.add('show');
+  
+  // Clear any existing timeout on the bubble to prevent early hiding
+  if (botBubble.hideTimeout) clearTimeout(botBubble.hideTimeout);
+  
+  botBubble.hideTimeout = setTimeout(() => {
+    botBubble.classList.remove('show');
+  }, duration);
+}
+
+// Wake bot up
+function wakeUp() {
+  if (bot.classList.contains('sleeping')) {
+    bot.classList.remove('sleeping');
+    showMessage("Resuming scanning...");
+  }
+  resetSleepTimer();
+}
+
+// Reset the inactivity timer
+function resetSleepTimer() {
+  clearTimeout(sleepTimer);
+  sleepTimer = setTimeout(() => {
+    bot.classList.add('sleeping');
+  }, SLEEP_DELAY);
+}
+
+// Track mouse to move eyes/face
+window.addEventListener('mousemove', (e) => {
+  wakeUp();
+  if(!bot.classList.contains('sleeping')) {
+    const botRect = botFace.getBoundingClientRect();
+    const botCenterX = botRect.left + botRect.width / 2;
+    const botCenterY = botRect.top + botRect.height / 2;
+    
+    // Calculate normalized delta for the eyes
+    const deltaX = (e.clientX - botCenterX) / window.innerWidth;
+    const deltaY = (e.clientY - botCenterY) / window.innerHeight;
+    
+    // Move the face around slightly
+    botFace.style.transform = `translate(${deltaX * 12}px, ${deltaY * 12}px)`;
+  } else {
+    botFace.style.transform = `translate(0px, 0px)`;
+  }
+});
+
+// Section tracking on scroll
+window.addEventListener('scroll', () => {
+  wakeUp();
+  let foundSection = currentSection;
+  const sections = ['top', 'about', 'skills', 'experience', 'projects', 'credentials', 'contact'];
+  
+  for (const sec of sections) {
+    const el = document.getElementById(sec);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.4 && rect.bottom >= 0) {
+        foundSection = sec;
+      }
+    }
+  }
+  
+  if (foundSection !== currentSection) {
+    currentSection = foundSection;
+    if (sectionMessages[currentSection]) {
+      showMessage(sectionMessages[currentSection]);
+    }
+  }
+});
+
+// Listeners to wake up bot on any action
+window.addEventListener('click', wakeUp);
+window.addEventListener('keypress', wakeUp);
+
+bot.addEventListener('click', () => {
+  wakeUp();
+  showMessage("Need assistance? I'm Saksham AI.");
+});
+
+// Initialize
+resetSleepTimer();
+setTimeout(() => showMessage("Saksham AI Online. Navigating...", 3500), 1000);
+
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
