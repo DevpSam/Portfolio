@@ -257,6 +257,38 @@ footer span{color:#fff}
 ::-webkit-scrollbar-thumb:hover{background:#fff}
 
 /* =========================================================
+   CYBER MOUSE (IDEA 2)
+   ========================================================= */
+.cyber-mouse {
+  position: fixed;
+  top: 0; left: 0;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  box-shadow: 0 0 12px #fff, 0 0 4px #fff;
+  z-index: 95;
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: center;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  will-change: transform, opacity;
+  transition: opacity 0.3s ease;
+}
+
+.mouse-hole {
+  position: absolute;
+  bottom: -1px; /* Align precisely with bottom edge */
+  right: 40px;
+  width: 32px;
+  height: 12px;
+  background: var(--bg-0);
+  border: 1px solid var(--tx-50);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  z-index: 10;
+}
+
+/* =========================================================
    NEO THE CYBER CAT (AI BOT)
    ========================================================= */
 .saksham-bot {
@@ -780,6 +812,9 @@ footer span{color:#fff}
       <a class="btn btn-ghost" target="_blank" rel="noopener" href="https://github.com/DevpSamSummary" data-testid="contact-github">GitHub</a>
       <a class="btn btn-ghost" href="tel:+919548350411" data-testid="contact-phone">+91 95483 50411</a>
     </div>
+    
+    <!-- Mouse Hole for Finale -->
+    <div id="mouse-hole" class="mouse-hole"></div>
   </div>
 </section>
 
@@ -792,6 +827,9 @@ footer span{color:#fff}
 </footer>
 
 </main>
+
+<!-- CYBER MOUSE (IDEA 2) -->
+<div id="cyber-mouse" class="cyber-mouse"></div>
 
 <!-- NEO THE CYBER CAT -->
 <div id="saksham-bot" class="saksham-bot">
@@ -902,7 +940,7 @@ resize();
 requestAnimationFrame(draw);
 
 /* =========================================================
-   NEO THE CYBER CAT (LOGIC & ROAMING)
+   NEO THE CYBER CAT & MOUSE LOGIC (IDEA 2)
    ========================================================= */
 const bot = document.getElementById('saksham-bot');
 const botBody = document.getElementById('bot-body');
@@ -911,11 +949,21 @@ const botBubble = document.getElementById('bot-bubble');
 const bubbleText = document.getElementById('bubble-text');
 const chatInput = document.getElementById('neo-chat-input');
 const chatLog = document.getElementById('neo-chat-log');
+const cyberMouse = document.getElementById('cyber-mouse');
 
 let sleepTimer;
 const SLEEP_DELAY = 5000;
 let isChatOpen = false;
 let isHovered = false; 
+let activeSection = 'top';
+
+// Mouse Chase Variables
+let mouseActive = false;
+let mouseCaught = false;
+let mouseTargetX = window.innerWidth - 80;
+let mouseTargetY = window.innerHeight + 100;
+let currentMouseX = mouseTargetX;
+let currentMouseY = mouseTargetY;
 
 // Neo Blinking Emote Reflex
 function neoBlink() {
@@ -928,7 +976,7 @@ function neoBlink() {
     neoBlink();
   }, delay);
 }
-neoBlink(); // Start blink cycle
+neoBlink(); 
 
 // Pause & Happy Emote on Hover logic
 botBody.addEventListener('mouseenter', () => { 
@@ -940,6 +988,23 @@ botBody.addEventListener('mouseleave', () => {
   bot.classList.remove('happy');
 });
 
+// Smoothly animate the Cyber Mouse
+function animateMouse() {
+  if (mouseActive) {
+    cyberMouse.style.opacity = 1;
+    currentMouseX += (mouseTargetX - currentMouseX) * 0.08;
+    currentMouseY += (mouseTargetY - currentMouseY) * 0.08;
+    
+    // Add organic wobble
+    const wobble = Math.sin(Date.now() / 100) * 3;
+    cyberMouse.style.transform = `translate(${currentMouseX + wobble}px, ${currentMouseY}px)`;
+  } else {
+    cyberMouse.style.opacity = 0;
+  }
+  requestAnimationFrame(animateMouse);
+}
+animateMouse();
+
 // Neo's Roaming Physics 
 let neoX = window.innerWidth - 100;
 let neoY = window.innerHeight - 100;
@@ -950,21 +1015,91 @@ function roam() {
   if (!isChatOpen) {
     let speedMult = isHovered ? 0 : (bot.classList.contains('sleeping') ? 0.3 : 1);
     
+    // --- MOUSE CHASE LOGIC ---
+    if (activeSection === 'contact' && !mouseCaught) {
+        mouseActive = true;
+        const hole = document.getElementById('mouse-hole');
+        if (hole) {
+            const rect = hole.getBoundingClientRect();
+            mouseTargetX = rect.left + rect.width / 2;
+            mouseTargetY = rect.top + rect.height / 2;
+        }
+        
+        // Hide mouse once it reaches the hole
+        const distMouseToHole = Math.hypot(mouseTargetX - currentMouseX, mouseTargetY - currentMouseY);
+        if (distMouseToHole < 10) cyberMouse.style.opacity = 0; 
+        
+        // Neo chases to the hole
+        const dx = mouseTargetX - neoX;
+        const dy = mouseTargetY - neoY;
+        const dist = Math.hypot(dx, dy);
+        
+        if (dist > 50) {
+            neoVx = (dx / dist) * 3.5; // Fast sprint to end
+            neoVy = (dy / dist) * 3.5;
+        } else {
+            // Target Secured!
+            neoVx = 0;
+            neoVy = 0;
+            mouseCaught = true;
+            mouseActive = false;
+            bot.classList.add('happy');
+            showBubble("Target secured. Signal open. Send an email.", 4500);
+            
+            if (!chatLog.innerHTML.includes("Target secured in contact zone")) {
+              addChatLog('Neo', 'Target secured in contact zone. <a href="mailto:sakshams1aug@gmail.com" style="color:#fff; text-decoration:underline; cursor:pointer; pointer-events:auto;">Click here to establish connection.</a>');
+            }
+        }
+    } 
+    else if (activeSection === 'contact' && mouseCaught) {
+        // Stay locked onto the hole while in the contact section
+        const hole = document.getElementById('mouse-hole');
+        if (hole) {
+            const rect = hole.getBoundingClientRect();
+            const dx = (rect.left + rect.width / 2) - neoX;
+            const dy = (rect.top + rect.height / 2) - neoY;
+            if(Math.hypot(dx, dy) > 10) {
+                neoX += dx * 0.1;
+                neoY += dy * 0.1;
+            }
+            neoVx = 0; neoVy = 0;
+        }
+    }
+    else if (mouseActive && !mouseCaught) {
+        // Neo chases the mouse through other sections
+        const dx = currentMouseX - neoX;
+        const dy = currentMouseY - neoY;
+        const dist = Math.hypot(dx, dy);
+        
+        if (dist > 40) {
+            neoVx = (dx / dist) * 2.5; 
+            neoVy = (dy / dist) * 2.5;
+        } else {
+            // Scurry away when Neo gets too close
+            if (Math.random() < 0.05) {
+               mouseTargetY = window.innerHeight * 0.2 + Math.random() * (window.innerHeight * 0.6);
+            }
+        }
+    } 
+    else {
+        // Standard Roaming
+        if (Math.random() < 0.02 && speedMult === 1) {
+          neoVx += (Math.random() - 0.5) * 1.5;
+          neoVy += (Math.random() - 0.5) * 1.5;
+          neoVx = Math.max(-2.5, Math.min(2.5, neoVx));
+          neoVy = Math.max(-2.5, Math.min(2.5, neoVy));
+        }
+    }
+    
     neoX += neoVx * speedMult;
     neoY += neoVy * speedMult;
 
-    // Bounce off edges with padding
-    if (neoX <= 20) { neoX = 20; neoVx *= -1; }
-    if (neoX >= window.innerWidth - 80) { neoX = window.innerWidth - 80; neoVx *= -1; }
-    if (neoY <= 80) { neoY = 80; neoVy *= -1; } 
-    if (neoY >= window.innerHeight - 80) { neoY = window.innerHeight - 80; neoVy *= -1; }
-
-    // Organic random directional drift
-    if (Math.random() < 0.02 && speedMult === 1) {
-      neoVx += (Math.random() - 0.5) * 1.5;
-      neoVy += (Math.random() - 0.5) * 1.5;
-      neoVx = Math.max(-2.5, Math.min(2.5, neoVx));
-      neoVy = Math.max(-2.5, Math.min(2.5, neoVy));
+    // Bounce off edges (unless pinned to the hole)
+    if (!mouseCaught || activeSection !== 'contact') {
+        if (neoX <= 20) { neoX = 20; neoVx *= -1; }
+        if (neoX >= window.innerWidth - 80) { neoX = window.innerWidth - 80; neoVx *= -1; }
+        if (neoY <= 80) { neoY = 80; neoVy *= -1; } 
+        if (neoY >= window.innerHeight - 80) { neoY = window.innerHeight - 80; neoVy *= -1; }
     }
   }
   
@@ -1065,7 +1200,7 @@ function resetSleepTimer() {
   sleepTimer = setTimeout(() => {
     if(!isChatOpen) {
       bot.classList.add('sleeping');
-      bot.classList.remove('happy'); // Remove happy state when falling asleep
+      bot.classList.remove('happy'); 
     }
   }, SLEEP_DELAY);
 }
@@ -1099,11 +1234,41 @@ window.addEventListener('mousemove', (e) => {
   }
 });
 
-// Listeners to wake up bot on scroll or keypress
-window.addEventListener('scroll', wakeUp);
-window.addEventListener('keypress', wakeUp);
+// Watch scroll to trigger Mouse Waypoints
+window.addEventListener('scroll', () => {
+  wakeUp();
+  let found = 'top';
+  const secs = ['top', 'about', 'skills', 'experience', 'projects', 'credentials', 'contact'];
+  for (const s of secs) {
+    const el = document.getElementById(s);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= 0) {
+        found = s;
+      }
+    }
+  }
+  
+  if (found !== activeSection) {
+    activeSection = found;
+    if (activeSection === 'contact') {
+       mouseActive = true;
+       mouseCaught = false;
+    } else if (activeSection !== 'top') {
+       mouseActive = true;
+       mouseCaught = false;
+       // Mouse darts to a new random location inside viewport
+       mouseTargetX = window.innerWidth - 80 - Math.random() * 80;
+       mouseTargetY = window.innerHeight * 0.3 + Math.random() * (window.innerHeight * 0.4);
+    } else {
+       mouseActive = false;
+       mouseCaught = false;
+    }
+  }
+});
 
 // Initialize
+window.addEventListener('keypress', wakeUp);
 resetSleepTimer();
 setTimeout(() => showBubble("Neo Online. Meow.", 3500), 1000);
 
